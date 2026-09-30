@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Advanced Grid Card - demo harness</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    /* The variables a stock Home Assistant dark theme provides. */
+    --ha-card-background: #1c1c1e;
+    --card-background-color: #1c1c1e;
+    --primary-text-color: #e8e8ea;
+    --secondary-text-color: #8e8e93;
+    --primary-color: #03a9f4;
+    --error-color: #ff5f56;
+    --divider-color: rgba(225, 225, 225, 0.12);
+    --ha-card-border-radius: 12px;
+  }
+  html, body {
+    margin: 0;
+    background: #0f1012;
+    color: #e8e8ea;
+    font-family: -apple-system, "SF Pro Text", Roboto, "Helvetica Neue", sans-serif;
+  }
+  body { padding: 24px; box-sizing: border-box; }
+  .scene { display: none; }
+  .scene.active { display: block; }
+  .strip { display: flex; flex-wrap: nowrap; gap: 28px; align-items: flex-start; }
+  .col { flex: 0 0 auto; }
+  .caption {
+    font-size: 12px;
+    color: #8e8e93;
+    margin: 0 0 8px 2px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .caption b { color: #e8e8ea; font-weight: 600; }
+  .measure {
+    font-size: 12px;
+    color: #8e8e93;
+    margin: 8px 0 0 2px;
+    font-variant-numeric: tabular-nums;
+    white-space: pre;
+  }
+</style>
+</head>
+<body>
+
+<!-- Scene: the three packing strategies on the same five cards -->
+<div class="scene" id="scene-packing">
+  <div class="strip">
+    <div class="col"><div class="caption"><b>packing: row</b> - like the native grid card</div><div class="host" data-config="packing-row" style="width: 400px"></div></div>
+    <div class="col"><div class="caption"><b>packing: dense</b> - like CSS dense</div><div class="host" data-config="packing-dense" style="width: 400px"></div></div>
+    <div class="col"><div class="caption"><b>packing: fill</b> - the default</div><div class="host" data-config="packing-fill" style="width: 400px"></div></div>
+  </div>
+</div>
+
+<!-- Scene: a realistic mix, packed with the default -->
+<div class="scene" id="scene-overview">
+  <div class="host" data-config="overview" style="width: 520px"></div>
+</div>
+
+<!-- Scene: one configuration at three card widths -->
+<div class="scene" id="scene-responsive">
+  <div class="strip">
+    <div class="col"><div class="caption"><b>narrow</b> - 360 px</div><div class="host" data-config="responsive" style="width: 360px"></div></div>
+    <div class="col"><div class="caption"><b>medium</b> - 560 px</div><div class="host" data-config="responsive" style="width: 560px"></div></div>
+    <div class="col"><div class="caption"><b>wide</b> - 860 px</div><div class="host" data-config="responsive" style="width: 860px"></div></div>
+  </div>
+</div>
+
+<!-- Scene: a hidden card, and how fill closes the gap it leaves -->
+<div class="scene" id="scene-visibility">
+  <div class="strip">
+    <div class="col"><div class="caption"><b>all visible</b></div><div class="host" data-config="visibility" style="width: 400px"></div></div>
+    <div class="col"><div class="caption"><b>Küche hidden</b></div><div class="host" data-config="visibility" data-hide="1" style="width: 400px"></div></div>
+  </div>
+</div>
+
+<!-- Scene: last_row start vs stretch -->
+<div class="scene" id="scene-last-row">
+  <div class="strip">
+    <div class="col"><div class="caption"><b>last_row: start</b></div><div class="host" data-config="last-row-start" style="width: 480px"></div></div>
+    <div class="col"><div class="caption"><b>last_row: stretch</b></div><div class="host" data-config="last-row-stretch" style="width: 480px"></div></div>
+  </div>
+</div>
+
+<script>
+  /**
+   * A stand-in for Home Assistant's hui-card: the same interface the grid
+   * uses (config, hass, preview, load(), getCardSize()) and the same way of
+   * hiding - display: none, [hidden], card-visibility-changed.
+   */
+  const FAKE_CSS = `
+  /* Stands in for a card: a surface with the name and span it was given. */
+  .fake {
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 56px;
+    background: var(--ha-card-background);
+    border: 1px solid var(--divider-color);
+    border-radius: var(--ha-card-border-radius);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    font-size: 13px;
+    overflow: hidden;
+  }
+  .fake .span { font-size: 11px; color: var(--secondary-text-color); font-variant-numeric: tabular-nums; }
+  `;
+
+  class FakeHuiCard extends HTMLElement {
+    load() {
+      // A real card has its own shadow root, so the page's styles do not
+      // reach it - and they would not reach this one either, since it lives
+      // inside the grid's shadow root.
+      const c = this.config || {};
+      const root = this.shadowRoot || this.attachShadow({ mode: 'open' });
+      root.innerHTML = `<style>:host { display: block; }${FAKE_CSS}</style>` +
+        `<div class="fake" style="min-height: ${c.height || 56}px"><div>${c.name || c.type}</div><div class="span">${c.label || ''}</div></div>`;
+    }
+    getCardSize() {
+      return Math.ceil((this.config?.height || 56) / 50);
+    }
+    setVisible(visible) {
+      if (this.hidden === !visible) return;
+      this.style.display = visible ? '' : 'none';
+      this.toggleAttribute('hidden', !visible);
+      this.dispatchEvent(new CustomEvent('card-visibility-changed', { bubbles: true, composed: true, detail: { value: visible } }));
+    }
+  }
+  customElements.define('hui-card', FakeHuiCard);
+
+  const fake = (name, span, extra = {}) => ({
+    type: 'demo',
+    name,
+    label: typeof span === 'object' ? Object.entries(span).map(([k, v]) => `${k} ${v}`).join(' · ') : `span ${span}`,
+    grid_span: span,
+    ...extra,
+  });
+  const five = [fake('A', 5), fake('B', 5), fake('C', 4), fake('D', 3), fake('E', 7)];
+
+  const CONFIGS = {
+    'packing-row': { columns: 12, gap: 8, packing: 'row', cards: five },
+    'packing-dense': { columns: 12, gap: 8, packing: 'dense', cards: five },
+    'packing-fill': { columns: 12, gap: 8, packing: 'fill', cards: five },
+    overview: {
+      columns: 12,
+      gap: 8,
+      title: 'Licht',
+      cards: [
+        fake('Wohnzimmer', 4), fake('Küche', 4), fake('Schlafzimmer', 4),
+        fake('Bad', 3), fake('Flur', 3), fake('Terrasse', 6),
+        fake('Büro', 5), fake('Keller', 2), fake('Garage', 5),
+      ],
+    },
+    responsive: {
+      columns: 12,
+      gap: 8,
+      cards: [
+        fake('Wohnzimmer', { narrow: 12, medium: 6, wide: 3 }),
+        fake('Küche', { narrow: 12, medium: 6, wide: 3 }),
+        fake('Schlafzimmer', { narrow: 6, wide: 3 }),
+        fake('Bad', { narrow: 6, wide: 3 }),
+      ],
+    },
+    visibility: {
+      columns: 12,
+      gap: 8,
+      cards: [fake('Wohnzimmer', 6), fake('Küche', 6), fake('Bad', 4), fake('Flur', 8), fake('Büro', 6)],
+    },
+    'last-row-start': { columns: 12, gap: 8, cards: [fake('A', 6), fake('B', 6), fake('C', 5), fake('D', 2)] },
+    'last-row-stretch': { columns: 12, gap: 8, last_row: 'stretch', cards: [fake('A', 6), fake('B', 6), fake('C', 5), fake('D', 2)] },
+  };
+
+  const scene = new URLSearchParams(location.search).get('scene') || 'packing';
+  document.getElementById(`scene-${scene}`)?.classList.add('active');
+
+  import('../../dist/advanced-grid-card.js').then(() => {
+    document.querySelectorAll(`#scene-${scene} .host`).forEach((host) => {
+      const card = document.createElement('advanced-grid-card');
+      card.setConfig({ type: 'custom:advanced-grid-card', ...CONFIGS[host.dataset.config] });
+      card.hass = {};
+      host.appendChild(card);
+      if (host.dataset.hide !== undefined) {
+        card.shadowRoot.querySelectorAll('hui-card')[Number(host.dataset.hide)].setVisible(false);
+      }
+    });
+  });
+</script>
+</body>
+</html>

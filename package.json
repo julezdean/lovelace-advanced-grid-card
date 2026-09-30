@@ -1,0 +1,36 @@
+{
+  "name": "lovelace-advanced-grid-card",
+  "version": "0.1.0",
+  "description": "A grid card for Home Assistant where every card sets its own width and the rows are packed without gaps",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julezdean/lovelace-advanced-grid-card.git"
+  },
+  "homepage": "https://github.com/julezdean/lovelace-advanced-grid-card#readme",
+  "bugs": {
+    "url": "https://github.com/julezdean/lovelace-advanced-grid-card/issues"
+  },
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "watch": "vite build --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test --ext .ts,.js",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "check": "npm run format:check && npm run lint && npm run build && npm test",
+    "screenshots": "npm run build && ./tools/screenshots.sh"
+  },
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vitest": "^3.0.0"
+  }
+}
