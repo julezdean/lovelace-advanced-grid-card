@@ -54,7 +54,7 @@ Adding it by hand instead:
    - Type: **JavaScript module**
 3. Reload the browser
 
-Confirm it loaded: the browser console prints `advanced-grid-card v0.1.0` on
+Confirm it loaded: the browser console prints `advanced-grid-card v0.1.0-beta.1` on
 startup.
 
 ---

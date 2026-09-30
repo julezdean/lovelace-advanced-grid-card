@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0-beta.1] - 2026-09-30
+
+The first release, as a beta: the layout is tested and measured in a browser,
+but the card has not yet run inside a real Home Assistant. Requires Home
+Assistant 2024.6 or later.
+
 ### Added
 
 - The card: a grid of ordinary Lovelace cards in which every card sets its
