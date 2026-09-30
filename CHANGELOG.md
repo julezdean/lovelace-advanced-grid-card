@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0-beta.1] - 2026-09-30
+
+### Added
+
+- A visual editor, laid out like Home Assistant's grid card editor: the
+  card's options, then one tab per card with that card's own editor, its
+  visibility tab, a width field above it and buttons to move, copy, cut and
+  delete. Tabs show each card's width.
+- The card picker shows a preview: the card starts from three tiles on real
+  entities (two half-width, one full-width).
+
+### Fixed
+
+- The README's HACS instructions are back to what they were: the "Open in
+  HACS" button adds the repository by itself. What made it fail before 0.1.0
+  was that only a pre-release existed, not that the repository was unknown.
+
 ## [0.1.0] - 2026-09-30
 
 The same card as 0.1.0-beta.1, now as a regular release. HACS cannot add a

@@ -1,6 +1,6 @@
 {
   "name": "lovelace-advanced-grid-card",
-  "version": "0.1.0",
+  "version": "0.2.0-beta.1",
   "description": "A grid card for Home Assistant where every card sets its own width and the rows are packed without gaps",
   "type": "module",
   "repository": {
@@ -25,6 +25,7 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
+    "@mdi/js": "^7.4.47",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "eslint": "^8.57.1",

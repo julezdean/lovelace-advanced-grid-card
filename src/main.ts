@@ -7,9 +7,12 @@
  *   layout/        the layout engine: pure functions, no DOM
  *   children/      the child cards, through Home Assistant's hui-card
  *   card/          the card element and its stylesheet
+ *   editor/        the visual editor, built from Home Assistant's own parts
  */
 import { AdvancedGridCard } from './card/card';
-import { CARD_TAG, CARD_VERSION, REPO_URL } from './const';
+import { CARD_TAG, CARD_VERSION, EDITOR_TAG, REPO_URL } from './const';
+import { defineOnce } from './define';
+import { AdvancedGridCardEditor } from './editor/editor';
 
 interface CustomCardEntry {
   type: string;
@@ -28,18 +31,8 @@ declare global {
 const inBrowser = typeof window !== 'undefined' && typeof customElements !== 'undefined';
 
 if (inBrowser) {
-  if (customElements.get(CARD_TAG)) {
-    // A second Lovelace resource entry for the same card loads this file
-    // twice, and whichever copy came first wins. From the outside that looks
-    // like "I deployed the new file and nothing changed", hence the warning.
-    console.warn(
-      `[${CARD_TAG}] is already registered, so this copy does nothing. You very ` +
-        `likely have two Lovelace resource entries pointing at this card. Keep ` +
-        `one under Settings > Dashboards > Resources and edit its ?v= instead.`,
-    );
-  } else {
-    customElements.define(CARD_TAG, AdvancedGridCard);
-  }
+  defineOnce(CARD_TAG, AdvancedGridCard, true);
+  defineOnce(EDITOR_TAG, AdvancedGridCardEditor);
 
   window.customCards = window.customCards || [];
   if (!window.customCards.some((card) => card.type === CARD_TAG)) {
@@ -47,7 +40,7 @@ if (inBrowser) {
       type: CARD_TAG,
       name: 'Advanced Grid Card',
       description: 'A grid where every card sets its own width, packed without gaps.',
-      preview: false,
+      preview: true,
       documentationURL: REPO_URL,
     });
   }
@@ -59,8 +52,19 @@ if (inBrowser) {
   );
 }
 
-export { CARD_VERSION, CARD_TAG, REPO_URL, AdvancedGridCard };
+export { CARD_VERSION, CARD_TAG, REPO_URL, AdvancedGridCard, AdvancedGridCardEditor };
 export { normalizeConfig, GRID_KEYS } from './config/normalize';
 export { resolveSpan } from './config/span';
 export { computeLayout, STRATEGIES } from './layout/engine';
 export { widthClassFor } from './layout/width';
+export {
+  applyCardForm,
+  applySpanForm,
+  cardFormData,
+  spanFormData,
+  tabLabel,
+  withGridKeys,
+  withoutGridKeys,
+  moveCard,
+  removeCard,
+} from './editor/transform';

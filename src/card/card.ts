@@ -1,5 +1,6 @@
 import { createHuiCard, whenHuiCardDefined, type HuiCardElement } from '../children/hui-card';
 import { normalizeConfig } from '../config/normalize';
+import { EDITOR_TAG } from '../const';
 import { computeLayout } from '../layout/engine';
 import { widthClassFor } from '../layout/width';
 import type { GridConfig, HomeAssistant, WidthClass } from '../types';
@@ -19,8 +20,31 @@ const BaseElement = (
 const UNMEASURED: WidthClass = 'medium';
 
 export class AdvancedGridCard extends BaseElement {
-  static getStubConfig(): Record<string, unknown> {
-    return { columns: 12, cards: [] };
+  static async getConfigElement(): Promise<HTMLElement> {
+    return document.createElement(EDITOR_TAG);
+  }
+
+  /**
+   * What the card picker previews and a new card starts from: three tiles on
+   * real entities where there are any, so the preview shows what the card is
+   * for - two half-width cards and a full-width one.
+   */
+  static getStubConfig(_hass: unknown, entities: string[] = []): Record<string, unknown> {
+    const preferred = ['light.', 'switch.', 'fan.', 'cover.'];
+    const picked = [
+      ...entities.filter((id) => preferred.some((domain) => id.startsWith(domain))),
+      ...entities,
+    ].filter((id, index, all) => all.indexOf(id) === index);
+    const spans = [6, 6, 12];
+    const cards =
+      picked.length >= spans.length
+        ? spans.map((span, i) => ({ type: 'tile', entity: picked[i], grid_span: span }))
+        : spans.map((span, i) => ({
+            type: 'markdown',
+            content: `Card ${i + 1} - grid_span ${span}`,
+            grid_span: span,
+          }));
+    return { columns: 12, cards };
   }
 
   /**

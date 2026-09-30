@@ -62,4 +62,7 @@ shoot packing    "1304,255"    packing
 shoot responsive "1884,255" responsive 1
 shoot visibility "876,255" visibility
 shoot last-row   "1036,191"   last-row
+# No editor screenshot: tools/demo/ renders it against stand-ins, not against
+# Home Assistant's real ha-form and card editors, so an image would show forms
+# that exist nowhere. The scene stays for development (?scene=editor).
 echo "Done."

@@ -85,6 +85,16 @@
   </div>
 </div>
 
+<!-- Scene: the editor against stand-ins for Home Assistant's form and card
+     editors. Development only, not screenshotted: it shows the wiring, not
+     what Home Assistant's real editors look like. -->
+<div class="scene" id="scene-editor">
+  <div class="strip">
+    <div class="col" style="width: 520px"><div class="caption"><b>editor</b></div><div id="editor-host"></div></div>
+    <div class="col" style="width: 520px"><div class="caption"><b>config-changed</b></div><pre id="editor-log" style="font-size: 11px; color: #a8d8a8; white-space: pre-wrap"></pre></div>
+  </div>
+</div>
+
 <script>
   /**
    * A stand-in for Home Assistant's hui-card: the same interface the grid
@@ -133,6 +143,66 @@
   }
   customElements.define('hui-card', FakeHuiCard);
 
+  /* -- stand-ins for the editor scene --------------------------------------- */
+  if (new URLSearchParams(location.search).get('scene') === 'editor') {
+    const fire = (el, type, detail) => el.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
+    const flat = (schema) => schema.flatMap((s) => (s.schema ? flat(s.schema) : [s]));
+    customElements.define('ha-form', class extends HTMLElement {
+      set schema(v) { this._schema = v; this._draw(); } get schema() { return this._schema; }
+      set data(v) { this._data = v; this._draw(); } get data() { return this._data; }
+      _draw() {
+        if (!this._schema || !this._data) return;
+        this.innerHTML = '';
+        for (const f of flat(this._schema)) {
+          const label = document.createElement('label');
+          label.style.cssText = 'display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:2px 0';
+          label.textContent = this.computeLabel ? this.computeLabel(f) : f.name;
+          const sel = f.selector || {};
+          let input;
+          if (sel.select) { input = document.createElement('select'); for (const o of sel.select.options) input.add(new Option(o.label, o.value)); input.value = this._data[f.name] ?? ''; }
+          else { input = document.createElement('input'); if (sel.boolean) { input.type = 'checkbox'; input.checked = !!this._data[f.name]; } else { input.type = sel.number ? 'number' : 'text'; input.value = this._data[f.name] ?? ''; } }
+          input.name = f.name;
+          input.addEventListener('change', () => {
+            const v = input.type === 'checkbox' ? input.checked : input.type === 'number' ? (input.value === '' ? undefined : Number(input.value)) : input.value;
+            fire(this, 'value-changed', { value: { ...this._data, [f.name]: v } });
+          });
+          label.append(input); this.append(label);
+        }
+      }
+    });
+    customElements.define('ha-icon-button', class extends HTMLElement {
+      connectedCallback() { this._draw(); }
+      set label(v) { this._label = v; this._draw(); } get label() { return this._label; }
+      set disabled(v) { this._disabled = v; this._draw(); } get disabled() { return this._disabled; }
+      set path(v) { this._path = v; }
+      _draw() { this.textContent = `[${this._label || '?'}${this._disabled ? ' (off)' : ''}]`; this.style.cssText = 'font-size:11px;cursor:pointer;margin:2px'; }
+    });
+    customElements.define('hui-card-element-editor', class extends HTMLElement {
+      set value(v) {
+        if (this._value && JSON.stringify(v) === JSON.stringify(this._value)) return;
+        this._value = v; this.innerHTML = '';
+        const area = document.createElement('textarea'); area.rows = 4; area.style.width = '100%';
+        area.value = JSON.stringify(v); area.addEventListener('change', () => { this._value = JSON.parse(area.value); fire(this, 'config-changed', { config: this._value, guiModeAvailable: true }); });
+        this.append(area);
+        // Home Assistant's element editor answers every new value with config-changed.
+        queueMicrotask(() => fire(this, 'config-changed', { config: this._value, guiModeAvailable: true }));
+      }
+      get value() { return this._value; }
+      toggleMode() { window.__modeToggles = (window.__modeToggles || 0) + 1; }
+    });
+    customElements.define('hui-card-picker', class extends HTMLElement {
+      connectedCallback() {
+        this.innerHTML = '';
+        for (const type of ['tile', 'markdown']) {
+          const b = document.createElement('button'); b.textContent = `pick ${type}`; b.dataset.pick = type;
+          b.addEventListener('click', () => fire(this, 'config-changed', { config: { type } }));
+          this.append(b);
+        }
+      }
+    });
+  }
+
+
   const fake = (name, span, extra = {}) => ({
     type: 'demo',
     name,
@@ -179,6 +249,28 @@
   document.getElementById(`scene-${scene}`)?.classList.add('active');
 
   import('../../dist/advanced-grid-card.js').then(() => {
+    if (scene === 'editor') {
+      const editor = document.createElement('advanced-grid-card-editor');
+      editor.hass = { localize: () => '' };
+      editor.setConfig({
+        type: 'custom:advanced-grid-card',
+        gap: '0.5rem',
+        cards: [
+          { type: 'tile', entity: 'light.wohnzimmer', grid_span: 6 },
+          { type: 'tile', entity: 'light.kueche', grid_span: { narrow: 12, wide: 3 } },
+          { type: 'markdown', content: 'Hallo' },
+        ],
+      });
+      window.__events = [];
+      editor.addEventListener('config-changed', (ev) => {
+        window.__events.push(ev.detail.config);
+        document.getElementById('editor-log').textContent = JSON.stringify(ev.detail.config, null, 2);
+        editor.setConfig(ev.detail.config); // what Home Assistant does
+      });
+      document.getElementById('editor-host').append(editor);
+      window.__editor = editor;
+      return;
+    }
     document.querySelectorAll(`#scene-${scene} .host`).forEach((host) => {
       const card = document.createElement('advanced-grid-card');
       card.setConfig({ type: 'custom:advanced-grid-card', ...CONFIGS[host.dataset.config] });

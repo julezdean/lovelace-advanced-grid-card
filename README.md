@@ -22,6 +22,7 @@ its configuration.
 - [How the layout works](#how-the-layout-works)
 - [Configuration reference](#configuration-reference)
 - [Different widths for different card sizes](#different-widths-for-different-card-sizes)
+- [The visual editor](#the-visual-editor)
 - [Behaviour details](#behaviour-details)
 - [Development](#development)
 
@@ -33,17 +34,16 @@ Requires Home Assistant 2024.6 or later.
 
 ### HACS
 
-The card is not in the HACS default store, so HACS has to be told about the
-repository first:
+[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=julezdean&repository=lovelace-advanced-grid-card&category=plugin)
+
+That button opens the repository straight in your HACS. Install it there, then
+reload the browser (Ctrl/Cmd-Shift-R).
+
+Adding it by hand instead:
 
 1. HACS → three-dot menu → **Custom repositories**
 2. Repository: `julezdean/lovelace-advanced-grid-card`, category **Dashboard**
-3. Install **Advanced Grid Card**, then reload the browser (Ctrl/Cmd-Shift-R)
-
-Once the repository is added, this button opens it straight in your HACS -
-before that, HACS answers that it cannot find it:
-
-[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=julezdean&repository=lovelace-advanced-grid-card&category=plugin)
+3. Install **Advanced Grid Card**
 
 ### Manual
 
@@ -55,7 +55,7 @@ before that, HACS answers that it cannot find it:
    - Type: **JavaScript module**
 3. Reload the browser
 
-Confirm it loaded: the browser console prints `advanced-grid-card v0.1.0` on
+Confirm it loaded: the browser console prints `advanced-grid-card v0.2.0-beta.1` on
 startup.
 
 ---
@@ -198,6 +198,36 @@ the next larger. `{ narrow: 12, wide: 3 }` is 12 at `medium`.
 
 ---
 
+## The visual editor
+
+The card has a visual editor, laid out like Home Assistant's own grid card
+editor: the card's options on top, then one tab per card with that card's own
+editor.
+
+- **Tabs** show each card's position and width - `2 · 3`, or `2 · 12/6/3` for
+  one width per card size. With `fill` the order on screen can differ from the
+  order of the tabs; the width is what finds a card again in the preview.
+- **Width** above each card's editor: a number of columns, or, with *Different
+  widths per card size*, one each for narrow, medium and wide. Left empty, the
+  card takes the default width. A `grid_span: full` from the YAML stays `full`
+  as long as the number shown for it is not changed.
+- **Each card's own editor** is Home Assistant's, including the visibility
+  tab. It never sees `grid_span`: Home Assistant's card editors refuse keys
+  they do not know and would switch to "visual editor not supported".
+- **Move, copy, cut and delete**, as in Home Assistant's editor. Copying uses
+  Home Assistant's card clipboard, so a card copied in Home Assistant's own
+  editors can be pasted here. A card copied here reaches Home Assistant's
+  card picker only after the page has been reloaded - it reads the clipboard
+  once per page load - so the "add card" tab offers its own paste button.
+  A copied card leaves its `grid_span` behind.
+- Options left at their default are not written to the YAML, and options the
+  editor cannot show - `gap: 0.5rem` - are left alone unless you change them.
+
+If Home Assistant's card editors cannot be loaded, the card's options stay
+editable and the cards are edited in the code editor.
+
+---
+
 ## Behaviour details
 
 - **The card has no surface of its own**, like the native grid and stack
@@ -247,7 +277,15 @@ with a stand-in for `hui-card` (same interface, same way of hiding), so the
 images in this README always show the current code. Run `npm run build`,
 serve the repo root and open `tools/demo/index.html?scene=packing`.
 
-Scenes: `overview`, `packing`, `responsive`, `visibility`, `last-row`.
+Scenes: `overview`, `packing`, `responsive`, `visibility`, `last-row`, and
+`editor`.
+
+The `editor` scene is for development only and is deliberately not
+screenshotted: it renders against stand-ins for Home Assistant's `ha-form`,
+card editor and card picker, so an image of it would show forms that exist
+nowhere. It does verify the wiring - forms and the child's editor fed and
+read back, `grid_span` kept out of the child's editor, move, copy, cut, paste
+and delete, `config-changed` emitted only for real changes.
 
 The window sizes in `tools/screenshots.sh` are measured, not guessed - if you
 change a scene, re-measure and update them.

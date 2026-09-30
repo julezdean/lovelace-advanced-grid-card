@@ -12,6 +12,7 @@ export const CARD_VERSION = __CARD_VERSION__;
  * stays as short as it can be.
  */
 export const CARD_TAG = 'advanced-grid-card';
+export const EDITOR_TAG = `${CARD_TAG}-editor`;
 export const REPO_URL = 'https://github.com/julezdean/lovelace-advanced-grid-card';
 
 /** The raster when `columns` is left out: the one the sections view uses. */
