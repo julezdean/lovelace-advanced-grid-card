@@ -45,9 +45,6 @@ before that, HACS answers that it cannot find it:
 
 [![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=julezdean&repository=lovelace-advanced-grid-card&category=plugin)
 
-So far only a beta has been released. HACS offers it once beta versions are
-enabled for this repository.
-
 ### Manual
 
 1. Download `advanced-grid-card.js` from the
@@ -58,7 +55,7 @@ enabled for this repository.
    - Type: **JavaScript module**
 3. Reload the browser
 
-Confirm it loaded: the browser console prints `advanced-grid-card v0.1.0-beta.1` on
+Confirm it loaded: the browser console prints `advanced-grid-card v0.1.0` on
 startup.
 
 ---

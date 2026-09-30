@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-30
+
+The same card as 0.1.0-beta.1, now as a regular release. HACS cannot add a
+repository that has only a pre-release: it then looks for the card on the
+`main` branch, where the built file is not committed, and reports the
+repository as not compliant.
+
+### Fixed
+
+- The README's HACS instructions: the repository has to be added as a custom
+  repository before the "Open in HACS" button can find it.
+
 ## [0.1.0-beta.1] - 2026-09-30
 
 The first release, as a beta: the layout is tested and measured in a browser,
