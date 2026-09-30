@@ -33,16 +33,20 @@ Requires Home Assistant 2024.6 or later.
 
 ### HACS
 
-[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=julezdean&repository=lovelace-advanced-grid-card&category=plugin)
-
-That button opens the repository straight in your HACS. Install it there, then
-reload the browser (Ctrl/Cmd-Shift-R).
-
-Adding it by hand instead:
+The card is not in the HACS default store, so HACS has to be told about the
+repository first:
 
 1. HACS → three-dot menu → **Custom repositories**
 2. Repository: `julezdean/lovelace-advanced-grid-card`, category **Dashboard**
-3. Install **Advanced Grid Card**
+3. Install **Advanced Grid Card**, then reload the browser (Ctrl/Cmd-Shift-R)
+
+Once the repository is added, this button opens it straight in your HACS -
+before that, HACS answers that it cannot find it:
+
+[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=julezdean&repository=lovelace-advanced-grid-card&category=plugin)
+
+So far only a beta has been released. HACS offers it once beta versions are
+enabled for this repository.
 
 ### Manual
 
